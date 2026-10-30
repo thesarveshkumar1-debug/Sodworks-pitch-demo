@@ -1,0 +1,341 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   SodWorks design tokens.
+   Everything visual starts here. Change a value in this block and it updates
+   across the whole showcase.
+   --------------------------------------------------------------------------- */
+@theme {
+  /* Ink — the warm near-black gallery ground */
+  --color-ink-900: #0f0e0d;
+  --color-ink-800: #171513;
+  --color-ink-700: #221f1c;
+  --color-ink-600: #2a2622;
+
+  /* Bone — text and hairlines */
+  --color-bone-50: #f5f2ec;
+  --color-bone-300: #a8a099;
+
+  /* Laterite — the single accent, after Tamil Nadu's red soil */
+  --color-laterite-500: #c65a34;
+  --color-laterite-300: #e8946e;
+
+  /* Type */
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter-tight);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Motion — one curve for the whole site */
+  --ease-sod: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-ink-900);
+    color: var(--color-bone-50);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Visible, on-brand focus ring for keyboard users */
+  :focus-visible {
+    outline: 2px solid var(--color-laterite-300);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-laterite-500);
+    color: var(--color-bone-50);
+  }
+}
+
+/* Anyone who asks for less motion gets none of it. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Demo palette: Burger & Filter (café concept)
+
+   Each demo page gets its own named palette so it can look like a different
+   business entirely. These tokens are only used inside the café demo —
+   the SodWorks shell never touches them.
+   --------------------------------------------------------------------------- */
+@theme {
+  /* Paper — warm cream grounds, the opposite of the gallery's ink */
+  --color-cafe-paper: #f6ede0;
+  --color-cafe-paper-deep: #ecdcc6;
+  --color-cafe-paper-edge: #ddc9ad;
+
+  /* Char — deep roasted brown, used for text */
+  --color-cafe-char: #2b1d14;
+  --color-cafe-muted: #7c6a59;
+
+  /* Ember — the café's accent */
+  --color-cafe-ember: #c14a22;
+
+  /* Leaf — used sparingly, for anything fresh */
+  --color-cafe-leaf: #4c6b3c;
+
+  /* The hero's dark field, and the two text tones that sit on it */
+  --color-cafe-espresso: #1c0d05;
+  --color-cafe-roast: #3f2617;
+  --color-cafe-amber: #ffba61;
+  --color-cafe-sand: #cbb49b;
+
+  /* Café type voice. These are only the fallbacks — the real fonts are bound
+     on .cafe-root below, because next/font's variables are scoped to the demo
+     wrapper and an alias declared here on :root resolves to nothing. */
+  --font-cafe-display: ui-sans-serif, system-ui, sans-serif;
+  --font-cafe-body: ui-serif, Georgia, serif;
+}
+
+/* Bind the café fonts where next/font actually defines them. */
+.cafe-root {
+  --font-cafe-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-cafe-body: var(--font-source-serif), ui-serif, Georgia, serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Café heroes.
+
+   Both food sequences are set in a real café: a photograph sits behind the
+   dish, blurred, so the room is recognisably a room while the burger and the
+   pizza stay the only things in focus.
+
+   Three layers, bottom to top:
+
+     1. the section's own espresso bed, which shows wherever the photo does
+        not reach and keeps the hero warm while the image is still loading;
+     2. `.cafe-room` — the photograph, blurred and overscaled (z-index 0);
+     3. `::before` — the scrim, carrying the amber spotlight that lights the
+        food and the falloff that the copy sits on (z-index 1);
+     4. `::after` — grain, so none of this bands on a wide screen.
+
+   The scrim's `z-index: 1` is load-bearing: `.cafe-room` is a later sibling
+   and would paint straight over a pseudo-element left on `auto`.
+
+   The two rooms are graded separately rather than sharing one treatment. The
+   burger's arrives dark and amber already; the pizza's is whitewashed brick
+   under bare lamps and needs a much deeper knock-down to stop it competing
+   with the cheese.
+   --------------------------------------------------------------------------- */
+.cafe-hero {
+  background: linear-gradient(170deg, #2d1a11 0%, #26140b 56%, #190b04 100%);
+}
+
+.cafe-hero-oven {
+  background: linear-gradient(190deg, #27150d 0%, #2c1810 54%, #190a03 100%);
+}
+
+/* --------------------------------------------------------------- The room */
+.cafe-room {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cafe-room img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--room-focus, 50% 42%);
+  /* Pushed past the frame so the blur never reveals its own soft edge at the
+     viewport boundary. Also the amount of slack the parallax drift runs in. */
+  transform: scale(1.08);
+}
+
+/* Burger: already a dark, lamp-lit room, so a light hand. The blur is a
+   shade heavier than the pizza's because this wall is covered in chalked
+   signage, which stays legible — and therefore distracting — longer than
+   furniture does. */
+.cafe-hero .cafe-room img {
+  filter: blur(8px) saturate(0.88) brightness(0.56) contrast(1.04);
+}
+
+/* Pizza: bright brick and bare bulbs. Knocked down and warmed in the filter
+   rather than buried under a heavier scrim — but only so far. Past about
+   brightness(0.5) the whitewash goes to mud, the row of lamps stops reading
+   as lamps, and the room becomes a brown field the pizza is pasted onto. The
+   vignette below does the rest of the work instead. */
+.cafe-hero-oven .cafe-room img {
+  filter: blur(7px) saturate(0.86) brightness(0.62) sepia(0.12) contrast(1.06);
+}
+
+/* -------------------------------------------------------------- The scrim */
+.cafe-hero::before,
+.cafe-hero-oven::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.cafe-hero::before {
+  background:
+    radial-gradient(
+      52% 42% at 50% 47%,
+      rgba(255, 186, 97, 0.3),
+      transparent 72%
+    ),
+    radial-gradient(
+      118% 86% at 50% 48%,
+      transparent 40%,
+      rgba(25, 11, 4, 0.74) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(25, 11, 4, 0.56) 0%,
+      rgba(25, 11, 4, 0.06) 28%,
+      rgba(25, 11, 4, 0.1) 60%,
+      rgba(25, 11, 4, 0.72) 100%
+    ),
+    /* The ingredient column sits here. Without this the copy is legible only
+       because the chalkboard happens to be dark behind it. */
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 62%,
+      rgba(25, 11, 4, 0.34) 100%
+    );
+}
+
+.cafe-hero-oven::before {
+  background:
+    radial-gradient(
+      54% 40% at 50% 54%,
+      rgba(255, 160, 74, 0.3),
+      transparent 72%
+    ),
+    radial-gradient(
+      118% 86% at 50% 52%,
+      transparent 40%,
+      rgba(26, 11, 4, 0.76) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(26, 11, 4, 0.52) 0%,
+      rgba(26, 11, 4, 0.08) 26%,
+      rgba(26, 11, 4, 0.12) 58%,
+      rgba(26, 11, 4, 0.74) 100%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 62%,
+      rgba(26, 11, 4, 0.38) 100%
+    );
+}
+
+/* --------------------------------------------------------------- The grain */
+.cafe-hero::after,
+.cafe-hero-oven::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------- Phones */
+@media (max-width: 767px) {
+  /* A landscape photograph cropped to a portrait viewport shows a sliver —
+     roughly a third of the room — which reads as wallpaper rather than as a
+     café. So on a phone the room keeps a wider crop by occupying only the
+     top of the hero and fading into the espresso bed, which also gives the
+     ingredient readout underneath a clean dark surface to sit on. */
+  .cafe-room {
+    bottom: auto;
+    height: 74dvh;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      #000 0%,
+      #000 54%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(180deg, #000 0%, #000 54%, transparent 100%);
+  }
+
+  .cafe-room img {
+    object-position: var(--room-focus-mobile, 50% 38%);
+    transform: scale(1.12);
+  }
+
+  /* A phone sees under half the room, so what it does see has to be read
+     quickly. Both are lifted and blurred a shade less than on desktop. */
+  .cafe-hero .cafe-room img {
+    filter: blur(5px) saturate(0.9) brightness(0.68) contrast(1.04);
+  }
+
+  .cafe-hero-oven .cafe-room img {
+    filter: blur(5px) saturate(0.88) brightness(0.72) sepia(0.12) contrast(1.06);
+  }
+
+  /* The desktop scrim's vignette is built for a landscape frame; on a tall
+     one it closes in from both sides and swallows the room. Here the mask on
+     `.cafe-room` already fades the bottom, so the scrim only has to seat the
+     title at the top and keep the amber spotlight under the dish. */
+  .cafe-hero::before {
+    background:
+      radial-gradient(
+        76% 32% at 50% 44%,
+        rgba(255, 186, 97, 0.24),
+        transparent 74%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(25, 11, 4, 0.74) 0%,
+        rgba(25, 11, 4, 0.14) 22%,
+        rgba(25, 11, 4, 0.04) 46%,
+        rgba(25, 11, 4, 0.2) 72%,
+        rgba(25, 11, 4, 0.52) 100%
+      );
+  }
+
+  .cafe-hero-oven::before {
+    background:
+      radial-gradient(
+        76% 30% at 50% 50%,
+        rgba(255, 160, 74, 0.24),
+        transparent 74%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(26, 11, 4, 0.76) 0%,
+        rgba(26, 11, 4, 0.16) 22%,
+        rgba(26, 11, 4, 0.04) 46%,
+        rgba(26, 11, 4, 0.2) 72%,
+        rgba(26, 11, 4, 0.52) 100%
+      );
+  }
+
+  /* Grain is a wide-screen banding fix; phones do not need it repainting. */
+  .cafe-hero::after,
+  .cafe-hero-oven::after {
+    display: none;
+  }
+}
+
+
+
+
